@@ -9,17 +9,20 @@ import UIKit
 protocol CollectionDelegate:AnyObject{
     func setupCell(collectionView:UICollectionView,indexPath:IndexPath)->VerticalMenuCell
     func createTwoColumns()->CGSize
+    func selectRow(indexPath:IndexPath)
+    func deselectRow(indexPath:IndexPath)
 }
 class ViewController: UIViewController,UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout {
     var numbers:[Int]=[]
     @IBOutlet var collectionView: UICollectionView!
+    var selectedRow:IndexPath!
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
         // Do any additional setup after loading the view.
     }
-
-
+    
+    
 }
 
 extension ViewController{
@@ -31,14 +34,14 @@ extension ViewController{
         for item in 0..<100{
             numbers.append(item)
         }
+        selectedRow = IndexPath(row: 0, section: 0)
+        
     }
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let cell:VerticalMenuCell = collectionView.cellForItem(at: indexPath) as! VerticalMenuCell
-        cell.lblDescription.backgroundColor = .cyan
+        selectRow(indexPath: indexPath)
     }
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        let cell:VerticalMenuCell = collectionView.cellForItem(at: indexPath) as! VerticalMenuCell
-        cell.lblDescription.backgroundColor = .clear
+        deselectRow(indexPath: indexPath)
     }
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return numbers.count
@@ -52,11 +55,36 @@ extension ViewController{
     
 }
 extension ViewController:CollectionDelegate {
+    func selectRow(indexPath:IndexPath) {
+        let cell:VerticalMenuCell = collectionView.cellForItem(at: indexPath) as! VerticalMenuCell
+        selectedRow = indexPath
+        cell.selectedCell = true
+        cell.lblDescription.backgroundColor = .blue
+    }
+    func deselectRow(indexPath:IndexPath) {
+        let cell:VerticalMenuCell = collectionView.cellForItem(at: indexPath) as! VerticalMenuCell
+        cell.lblDescription.backgroundColor = .clear
+    }
     func setupCell(collectionView:UICollectionView,indexPath:IndexPath)->VerticalMenuCell{
         let cell:VerticalMenuCell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! VerticalMenuCell
-        if indexPath.row < numbers.count {
+        if selectedRow.row == 0 {
+            cell.lblDescription.backgroundColor = .none
+        }
+        else if indexPath.row == selectedRow.row {
+            cell.lblDescription.backgroundColor = .blue
+        }
+        else{
+            cell.lblDescription.backgroundColor = .clear
+        }
+        debugPrint(indexPath.row,selectedRow.row)
+        if indexPath.row < numbers.count  {
             cell.lblDescription.text = String(numbers[indexPath.row])
             cell.lblDescription.textColor = .white
+        }
+        else{
+            cell.lblDescription.text = String(numbers[indexPath.row])
+            cell.lblDescription.textColor = .white
+            cell.lblDescription.backgroundColor = .clear
         }
         return cell
     }
